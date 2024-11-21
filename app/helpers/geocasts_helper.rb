@@ -1,0 +1,2 @@
+module GeocastsHelper
+end
