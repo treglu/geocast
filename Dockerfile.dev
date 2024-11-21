@@ -16,18 +16,20 @@ WORKDIR /rails
 
 # Install base packages
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y curl libjemalloc2 && \
+    apt-get install --no-install-recommends -y curl libjemalloc2 tini git && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
 # Set production environment
-ENV RAILS_ENV="development" 
+ENV RAILS_ENV="development" \
+    BUNDLE_PATH="/usr/local/bundle"
+
 
 # Throw-away build stage to reduce size of final image
 FROM base AS build
 
 # Install packages needed to build gems
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y build-essential git pkg-config
+    apt-get install --no-install-recommends -y build-essential git gh pkg-config  
     # rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
 # Install application gems
@@ -55,11 +57,10 @@ FROM base
 COPY --from=build "${BUNDLE_PATH}" "${BUNDLE_PATH}"
 COPY --from=build /rails /rails
 
-# Run and own only the runtime files as a non-root user for security
-RUN groupadd --system --gid 1000 rails && \
-    useradd rails --uid 1000 --gid 1000 --create-home --shell /bin/bash && \
-    chown -R rails:rails log tmp
-USER 1000:1000
+EXPOSE 3005
 
-EXPOSE 3000
+# Use Tini as the entrypoint
+# ENTRYPOINT ["tini", "--"]
+
+# The default command to run
 CMD ["sleep", "infinity"]
