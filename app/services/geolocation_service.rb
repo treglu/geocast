@@ -5,11 +5,8 @@ class GeolocationService
   end
 
   def call
-    results.first.coordinates if valid?
-  end
-
-  def valid?
-    results.any?
+    return [] unless results.any?
+    results.first.coordinates
   end
 
   private

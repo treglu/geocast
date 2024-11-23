@@ -3,43 +3,43 @@ require "rails_helper"
 RSpec.describe GeolocationService, type: :service do
   describe "#call" do
     context "with a valid address" do
-      include_context "with a valid address"
+      let(:valid_address) { "1 Apple Park Way, Cupertino, CA" }
+      let(:coordinates) { [37.3362065, -122.0069962] }
+      let(:service) { GeolocationService.new(valid_address) }
+
+      before do
+        # Mocking Geocoder to avoid API requests during testing
+        allow(Geocoder).to receive(:search).with(valid_address).and_return([double(coordinates: coordinates)])
+      end
+
       it "returns the coordinates" do
         expect(service.call).to eq(coordinates)
       end
     end
     context "with an invalid address" do
-      include_context "with an invalid address"
+      let(:invalid_address) { "Invalid Address" }
+      let(:service) { GeolocationService.new(invalid_address) }
+
+      before do
+        # Mocking Geocoder to avoid API requests during testing
+        allow(Geocoder).to receive(:search).with(invalid_address).and_return([])
+      end
+
       it "call response should be nil" do
-        expect(service.call).to be nil
+        expect(service.call).to eq([])
       end
     end
     context "with an empty address" do
-      include_context "with an empty address"
+      let(:empty_address) { "" }
+      let(:service) { GeolocationService.new(empty_address) }
+
+      before do
+        # Mocking Geocoder to avoid API requests during testing
+        allow(Geocoder).to receive(:search).with(empty_address).and_return([])
+      end
+
       it "call response should be nil" do
-        expect(service.call).to be nil
-      end
-    end
-  end
-
-  describe "#valid?" do
-    context "with a valid address" do
-      include_context "with a valid address"
-      it "returns valid response" do
-        expect(service.valid?).to be true
-      end
-    end
-    context "with an invalid address" do
-      include_context "with an invalid address"
-      it "response should be invalid" do
-        expect(service.valid?).to be false
-      end
-    end
-
-    context "with an empty address" do
-      include_context "with an empty address"
-      it "response should be invalid" do
-        expect(service.valid?).to be false
+        expect(service.call).to eq([])
       end
     end
   end

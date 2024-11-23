@@ -53,6 +53,9 @@ group :development, :test do
 
   # Using Geocoder gem for parsing addresses and getting lat,Lon coordinates
   gem "geocoder"
+
+  # Using Faraday HTTP Client for talking with Weather API
+  gem "faraday"
 end
 
 group :development do
