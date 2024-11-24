@@ -307,6 +307,8 @@ GEM
       rubocop-minitest
       rubocop-performance
       rubocop-rails
+    rubocop-rspec (3.2.0)
+      rubocop (~> 1.61)
     ruby-lsp (0.21.3)
       language_server-protocol (~> 3.17.0)
       prism (>= 1.2, < 2.0)
@@ -398,7 +400,10 @@ DEPENDENCIES
   puma (>= 5.0)
   rails (~> 8.0.0)
   rspec-rails
+  rubocop
   rubocop-rails-omakase
+  rubocop-rspec
+  ruby-lsp
   ruby-lsp-rspec
   selenium-webdriver
   standard

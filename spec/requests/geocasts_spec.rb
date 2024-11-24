@@ -1,7 +1,7 @@
 require "rails_helper"
 
 RSpec.describe "Geocasts", type: :request do
-  describe "POST /geocast" do
+  describe "GET /geocast?address=:address" do
     context "with non-empty address field" do
       context "containing valid address" do
         before do
@@ -9,6 +9,7 @@ RSpec.describe "Geocasts", type: :request do
           geolocation_double = instance_double(GeolocationService)
           allow(GeolocationService).to receive(:new).with(address).and_return(geolocation_double)
           allow(geolocation_double).to receive(:call).and_return(coordinates)
+          allow(geolocation_double).to receive(:located_address).and_return(located_address)
 
           weather_service_double = instance_double(WeatherGovService)
           allow(WeatherGovService).to receive(:new).with(coordinates).and_return(weather_service_double)
@@ -16,10 +17,32 @@ RSpec.describe "Geocasts", type: :request do
         end
 
         let(:address) { "1 Apple Park Way, Cupertino, CA" }
+        let(:located_address) { "1 Apple Park Way, Cupertino, California, 94087" }
         let(:coordinates) { [37.3362, -122.0070] }
-        let(:weather_forecast) { [{name: "This Afternoon", temperature: 75, shortForecast: "Sunny"}] }
+        let(:weather_forecast) {
+          [
+            {name: "This Afternoon",
+             temperature: 75,
+             shortForecast: "Sunny",
+             icon: "https://api.weather.gov/icons/land/day/wind_skc?size=medium",
+             startTime: "2024-11-20T10:00:00-06:00",
+             probabilityOfPrecipitation: {
+               unitCode: "wmoUnit:percent",
+               value: nil
+             }},
+            {name: "Tonight",
+             temperature: 55,
+             shortForecast: "Clear",
+             startTime: "2024-11-20T18:00:00-06:00",
+             icon: "https://api.weather.gov/icons/land/day/wind_skc?size=medium",
+             probabilityOfPrecipitation: {
+               unitCode: "wmoUnit:percent",
+               value: 30
+             }}
+          ]
+        }
 
-        before { post geocast_path, params: {address: address} }
+        before { get geocast_path(address: address) }
         it "returns a successful HTTP response" do
           expect(response).to have_http_status :ok
         end
@@ -28,6 +51,7 @@ RSpec.describe "Geocasts", type: :request do
           expect(response.body).to include(weather_forecast.first[:name])
           expect(response.body).to include(weather_forecast.first[:temperature].to_s)
           expect(response.body).to include(weather_forecast.first[:shortForecast])
+          expect(response.body).to include(located_address)
         end
       end
       context "containing invalid address" do
@@ -41,12 +65,7 @@ RSpec.describe "Geocasts", type: :request do
         let(:address) { "INVALID ADDRESS" }
         let(:coordinates) { [] }
 
-        before do
-          post geocast_path, params: {address: address}
-        end
-        it "redirects back" do
-          expect(response).to redirect_to(root_path)
-        end
+        before { get geocast_path(address: address) }
 
         it "has alert flash with a message to user" do
           expect(flash[:alert]).to include("Could not process entered text. Please check that you are entering a valid address")
@@ -59,6 +78,7 @@ RSpec.describe "Geocasts", type: :request do
         geolocation_double = instance_double(GeolocationService)
         allow(GeolocationService).to receive(:new).with(address).and_return(geolocation_double)
         allow(geolocation_double).to receive(:call).and_return(coordinates)
+        allow(geolocation_double).to receive(:located_address).and_return(located_address)
 
         weather_service_double = instance_double(WeatherGovService)
         allow(WeatherGovService).to receive(:new).with(coordinates).and_return(weather_service_double)
@@ -67,17 +87,13 @@ RSpec.describe "Geocasts", type: :request do
       end
 
       let(:address) { "Kyiv, Ukraine" }
+      let(:located_address) { "Kyiv, Ukraine" }
       let(:coordinates) { [50.4019, 30.3679] }
 
       # Return empty forecast
       let(:weather_forecast) { [] }
 
-      before do
-        post geocast_path, params: {address: address}
-      end
-      it "redirects back" do
-        expect(response).to redirect_to(root_path)
-      end
+      before { get geocast_path(address: address) }
 
       it "has alert flash with a message to user" do
         expect(flash[:alert]).to include("Mock error message")
@@ -86,9 +102,10 @@ RSpec.describe "Geocasts", type: :request do
 
     context "with empty address field" do
       let(:address) { "" }
+
       before do
-        get root_path
-        post geocast_path, params: {address: address}
+        get root_path # set HTTP Referrer
+        get geocast_path(address: address)
       end
 
       it "redirects back" do

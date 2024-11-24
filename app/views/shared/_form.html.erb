@@ -1,0 +1,14 @@
+<%= form_with url: geocast_path, method: "GET" do |f|%>
+  <div class="row g-3">
+    <div class="col-md-8">
+      <div class="form-floating">
+        <%= f.text_field :address, class: "form-control", placeholder: "Address", value: @address, required: true %>
+        <%= f.label :address, "Address" %>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <%= f.submit "Check Weather", class: "btn btn-primary h-100 btn-lg" %>
+    </div>
+  </div>
+
+<%- end%>

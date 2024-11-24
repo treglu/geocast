@@ -9,6 +9,13 @@ class GeolocationService
     results.first.coordinates
   end
 
+  def located_address
+    return unless results.any?
+    addr = results.first
+
+    "#{addr.house_number} #{addr.street}, #{addr.city}, #{addr.state}, #{addr.postal_code}" if addr
+  end
+
   private
 
   def results

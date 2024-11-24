@@ -1,0 +1,9 @@
+- if flash.any?
+  %div.flash-container{ data: { controller: "flash" } }
+    - flash.each do |type, message|
+      %div{ class: "alert #{bootstrap_class_for(type)} alert-dismissible fade show", role: "alert", data: { flash_target: "alert" } }
+        - if message.is_a?(Array)
+          = message.join(', ')
+        - else
+          = message
+        %button{ type: "button", class: "btn-close", "data-bs-dismiss": "alert", "aria-label": "Close" }

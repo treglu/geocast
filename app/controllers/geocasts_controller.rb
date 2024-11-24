@@ -1,17 +1,21 @@
 class GeocastsController < ApplicationController
-  def create
-    unless address_params[:address].present?
+  def show
+    @address = params[:address] || ""
+
+    unless @address.present?
       flash[:alert] = "Please enter address"
       redirect_back(fallback_location: root_path) and return
     end
 
-    geolocation_service = GeolocationService.new(address_params[:address])
+    geolocation_service = GeolocationService.new(@address)
     coordinates = geolocation_service.call
 
     unless coordinates.any?
       flash[:alert] = "Could not process entered text. Please check that you are entering a valid address"
       redirect_back(fallback_location: root_path) and return
     end
+
+    @located_address = geolocation_service.located_address
 
     weather_service = WeatherGovService.new(coordinates)
     @forecast = weather_service.call
@@ -21,16 +25,32 @@ class GeocastsController < ApplicationController
       redirect_back(fallback_location: root_path) and return
 
     end
-    render :show
-  end
 
-  private
+    # Group forecasts by day
+    grouped_forecasts = @forecast.group_by do |entry|
+      Time.parse(entry[:startTime]).strftime("%Y-%m-%d")
+    end
 
-  def address_params
-    params.permit(:address)
-  end
+    # Process grouped data
+    @summary_forecast = grouped_forecasts.map do |day, forecasts|
+      # Extract the temperatures for the current day
+      temperatures = forecasts.map { |f| f[:temperature] }
 
-  def coordinates
-    service = GeolocationService.new(address_params[:address])
+      # Find the highest and lowest temperatures for the day
+      high_temp = temperatures.max
+      low_temp = temperatures.min
+
+      # Calculate the average chance of rain for the day
+      total_chance_of_rain = forecasts.sum { |f| f[:probabilityOfPrecipitation]["value"].to_i }
+      avg_chance_of_rain = (total_chance_of_rain.to_f / forecasts.size).round(0)
+
+      # Create a hash for the day's summary
+      {
+        date: Date.parse(day),
+        high_temp: high_temp,
+        low_temp: low_temp,
+        avg_chance_of_rain: avg_chance_of_rain
+      }
+    end
   end
 end
