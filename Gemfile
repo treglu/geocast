@@ -32,6 +32,10 @@ gem "kamal", require: false
 # Add HTTP asset caching/compression and X-Sendfile acceleration to Puma [https://github.com/basecamp/thruster/]
 gem "thruster", require: false
 
+# Using Geocoder gem for parsing addresses and getting lat,Lon coordinates
+gem "geocoder"
+
+# Using HAML for views
 gem "haml-rails"
 
 group :development, :test do
@@ -54,8 +58,6 @@ group :development, :test do
   # Using StandardRB for linting and style
   gem "standard"
 
-  # Using Geocoder gem for parsing addresses and getting lat,Lon coordinates
-  gem "geocoder"
 
   # Using Faraday HTTP Client for talking with Weather API
   gem "faraday"
