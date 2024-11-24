@@ -1,48 +1,56 @@
+.small.badge.text-bg-secondary= @cache_indicator
 %h1 Forecast for #{@located_address}
+
 = render "shared/form"
 %hr
+- if @forecast && @forecast.any?
+  %h2.py-4 Current Conditions
+  - current_forecast = @forecast.first
+  .card.mb-3
+    .row.g-0
+      - if current_forecast[:icon]
+        .col-md-2= image_tag large_weather_icon_url(current_forecast[:icon]), class: "img-fluid rounded-start"
+      - else 
+        .placeholder.col-md-2
 
-%h2.py-4 Current Conditions
-- current_forecast = @forecast.first
-.card.mb-3
-  .row.g-0
-    .col-md-2
-      = image_tag large_weather_icon_url(current_forecast[:icon]), class: "img-fluid rounded-start"
-    .col-md-10
-      .card-body
-        %h5.card-title #{current_forecast[:name]}: #{current_forecast[:shortForecast]}
-        .card-text.d-flex.justify-content-between
-          %p Current Temperature: #{current_forecast.dig(:temperature)}#{current_forecast.dig(:temperatureUnit)}
-          %p Wind: #{current_forecast.dig(:windDirection)} - #{current_forecast.dig(:windSpeed)}
-          %p Parcipitation: #{current_forecast.dig(:probabilityOfPrecipitation, "value")}%
-        .card-text= current_forecast[:detailedForecast]
-        .card-text
-
-
-%h2.py-4 Summary Forecast
-.d-flex.overflow-x-scroll
-  - @summary_forecast.each do |day|
-    .card.me-3{style: "min-width: 200px;"}
-      .card-header= pretty_date(day[:date])
-      .card-body.justify-content-between
-        .card-text High: #{day[:high_temp]}
-        .card-text Low: #{day[:low_temp]}
-        .card-text Rain Chance: #{day[:avg_chance_of_rain]}%
+      .col-md-10
+        .card-body
+          %h5.card-title #{current_forecast[:name]}: #{current_forecast[:shortForecast]}
+          .card-text.d-flex.justify-content-between
+            %p Current Temperature: #{current_forecast.dig(:temperature)}#{current_forecast.dig(:temperatureUnit)}
+            %p Wind: #{current_forecast.dig(:windDirection)} - #{current_forecast.dig(:windSpeed)}
+            %p Parcipitation: #{current_forecast.dig(:probabilityOfPrecipitation, "value")}%
+          .card-text= current_forecast[:detailedForecast]
+          .card-text
 
 
-%h2.py-4 Extended Forecast
-.list-group
-  - @forecast.each do |day_part|
-    .list-group-item
-      .row
-        .col-md-2
-          = image_tag day_part[:icon], class: "img-fluid"
-        .col-md-10
-          %h6 #{day_part[:name]}, #{pretty_date(day_part[:startTime], dow: false)}
-          %h5= day_part[:shortForecast]
-          .d-flex.justify-content-between
-            %p Current Temperature: #{day_part.dig(:temperature)}#{day_part.dig(:temperatureUnit)}
-            %p Wind: #{day_part.dig(:windDirection)} - #{day_part.dig(:windSpeed)}
-            - if day_part.dig(:probabilityOfPrecipitation, "value")
-              %p Parcipitation: #{day_part.dig(:probabilityOfPrecipitation, "value")}%
-          %p= day_part[:detailedForecast]
+  %h2.py-4 Summary Forecast
+  .d-flex.overflow-x-scroll
+    - @summary_forecast.each do |day|
+      .card.me-3{style: "min-width: 200px;"}
+        .card-header= pretty_date(day[:date])
+        .card-body.justify-content-between
+          .card-text High: #{day[:high_temp]}
+          .card-text Low: #{day[:low_temp]}
+          .card-text Rain Chance: #{day[:avg_chance_of_rain]}%
+
+
+  %h2.py-4 Extended Forecast
+  .list-group
+    - @forecast.each do |day_part|
+      .list-group-item
+        .row
+          .col-md-2
+            = image_tag day_part[:icon], class: "img-fluid"
+          .col-md-10
+            %h6 #{day_part[:name]}, #{pretty_date(day_part[:startTime], dow: false)}
+            %h5= day_part[:shortForecast]
+            .d-flex.justify-content-between
+              %p Current Temperature: #{day_part.dig(:temperature)}#{day_part.dig(:temperatureUnit)}
+              %p Wind: #{day_part.dig(:windDirection)} - #{day_part.dig(:windSpeed)}
+              - if day_part.dig(:probabilityOfPrecipitation, "value")
+                %p Parcipitation: #{day_part.dig(:probabilityOfPrecipitation, "value")}%
+            %p= day_part[:detailedForecast]
+
+- else
+  %h4.py-4 Could not load the forecast. Please check the address and try again.

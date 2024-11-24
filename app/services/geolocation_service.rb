@@ -12,8 +12,20 @@ class GeolocationService
   def located_address
     return unless results.any?
     addr = results.first
+    if addr
+      [
+        "#{addr.house_number} #{addr.street}",
+        addr.city || addr.county,
+        addr.state,
+        addr.postal_code
+      ].join(", ")
+    end
+    # "#{addr.house_number} #{addr.street}, #{addr.city}, #{addr.state}, #{addr.postal_code}" if addr
+  end
 
-    "#{addr.house_number} #{addr.street}, #{addr.city}, #{addr.state}, #{addr.postal_code}" if addr
+  def postal_code
+    return unless results.any?
+    results.first.postal_code
   end
 
   private

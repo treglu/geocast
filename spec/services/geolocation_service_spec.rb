@@ -32,6 +32,10 @@ RSpec.describe GeolocationService, type: :service do
         service.call
         expect(service.located_address).to eq(full_address)
       end
+
+      it "returns correct postal code" do
+        expect(service.postal_code).to eq(expected_response[:postal_code])
+      end
     end
     context "with an invalid address" do
       let(:invalid_address) { "Invalid Address" }

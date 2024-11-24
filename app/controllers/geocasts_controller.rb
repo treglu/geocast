@@ -12,19 +12,22 @@ class GeocastsController < ApplicationController
 
     unless coordinates.any?
       flash[:alert] = "Could not process entered text. Please check that you are entering a valid address"
-      redirect_back(fallback_location: root_path) and return
+      render :show and return
     end
 
     @located_address = geolocation_service.located_address
+    postal_code = geolocation_service.postal_code
 
-    weather_service = WeatherGovService.new(coordinates)
+    weather_service = WeatherGovService.new(coordinates:, postal_code:)
     @forecast = weather_service.call
 
     unless @forecast.any?
       flash[:alert] = weather_service.error_message
-      redirect_back(fallback_location: root_path) and return
+      render :show and return
 
     end
+
+    @cache_indicator = "#{weather_service.cached ? "Cached" : "Live"} results"
 
     # Group forecasts by day
     grouped_forecasts = @forecast.group_by do |entry|

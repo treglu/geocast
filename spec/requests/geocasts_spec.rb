@@ -10,15 +10,19 @@ RSpec.describe "Geocasts", type: :request do
           allow(GeolocationService).to receive(:new).with(address).and_return(geolocation_double)
           allow(geolocation_double).to receive(:call).and_return(coordinates)
           allow(geolocation_double).to receive(:located_address).and_return(located_address)
+          allow(geolocation_double).to receive(:postal_code).and_return(postal_code)
 
           weather_service_double = instance_double(WeatherGovService)
-          allow(WeatherGovService).to receive(:new).with(coordinates).and_return(weather_service_double)
+          allow(WeatherGovService).to receive(:new).with(coordinates:, postal_code:).and_return(weather_service_double)
           allow(weather_service_double).to receive(:call).and_return(weather_forecast)
+          allow(weather_service_double).to receive(:cached).and_return(true)
         end
 
         let(:address) { "1 Apple Park Way, Cupertino, CA" }
         let(:located_address) { "1 Apple Park Way, Cupertino, California, 94087" }
         let(:coordinates) { [37.3362, -122.0070] }
+        let(:postal_code) { "94087" }
+
         let(:weather_forecast) {
           [
             {name: "This Afternoon",
@@ -53,6 +57,9 @@ RSpec.describe "Geocasts", type: :request do
           expect(response.body).to include(weather_forecast.first[:shortForecast])
           expect(response.body).to include(located_address)
         end
+        it "should have cached results indicator" do
+          expect(response.body).to include("Cached results")
+        end
       end
       context "containing invalid address" do
         before do
@@ -79,9 +86,10 @@ RSpec.describe "Geocasts", type: :request do
         allow(GeolocationService).to receive(:new).with(address).and_return(geolocation_double)
         allow(geolocation_double).to receive(:call).and_return(coordinates)
         allow(geolocation_double).to receive(:located_address).and_return(located_address)
+        allow(geolocation_double).to receive(:postal_code).and_return(postal_code)
 
         weather_service_double = instance_double(WeatherGovService)
-        allow(WeatherGovService).to receive(:new).with(coordinates).and_return(weather_service_double)
+        allow(WeatherGovService).to receive(:new).with(coordinates:, postal_code:).and_return(weather_service_double)
         allow(weather_service_double).to receive(:error_message).and_return("Mock error message")
         allow(weather_service_double).to receive(:call).and_return(weather_forecast)
       end
@@ -89,6 +97,9 @@ RSpec.describe "Geocasts", type: :request do
       let(:address) { "Kyiv, Ukraine" }
       let(:located_address) { "Kyiv, Ukraine" }
       let(:coordinates) { [50.4019, 30.3679] }
+      let(:postal_code) { "44494087" }
+
+      # let(:postal_code) { "10001" }
 
       # Return empty forecast
       let(:weather_forecast) { [] }
