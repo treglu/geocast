@@ -23,4 +23,23 @@ current temperature (Bonus points - [DONE] Retrieve high/low and/or [DONE] xtend
 ## App Documenation
 
 ### Overview 
-This app is an assignment 
+This app is an interview assignment focused on building a production-ready code with 
+enterprise-level software development practices
+
+### Installation
+
+This application is currently designed to use Docker Compose for deployment for simplicity. 
+No other prerequisites are required.
+
+
+1. Clone the repository
+```bash
+git clone https://github.com/treglu/geocast.git
+```
+
+2. Launch app
+```bash
+docker compose up
+```
+
+3. Access the application by going to http://localhost
