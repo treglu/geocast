@@ -44,7 +44,7 @@ class GeocastsController < ApplicationController
       low_temp = temperatures.min
 
       # Calculate the average chance of rain for the day
-      total_chance_of_rain = forecasts.sum { |f| f[:probabilityOfPrecipitation]["value"].to_i }
+      total_chance_of_rain = forecasts.sum { |f| f[:probabilityOfPrecipitation][:value].to_i }
       avg_chance_of_rain = (total_chance_of_rain.to_f / forecasts.size).round(0)
 
       # Create a hash for the day's summary
