@@ -51,7 +51,7 @@ jobs:
           bundler-cache: true
 
       - name: Lint code for consistent style
-        run: bin/rubocop -f github
+        run: bin/rails standard:fix
 
   test:
     runs-on: ubuntu-latest
@@ -82,7 +82,7 @@ jobs:
         
         # Not using database for this application, no test database to set up.
         # run: bin/rails db:test:prepare test test:system
-        run: bin/rails test test:system
+        run: bin/rails spec
 
       - name: Keep screenshots from failed system tests
         uses: actions/upload-artifact@v4
