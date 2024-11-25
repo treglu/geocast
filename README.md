@@ -64,7 +64,7 @@ The best way to work on updating this code is to deploy it in the Docker Dev con
 
 2. **Deploy the development container**
    ```bash
-   docker compose -f '/home/andrey/geocast/docker-compose-dev.yml' up -d --build
+   docker compose -f 'docker-compose-dev.yml' up -d --build
    ```
 
 3. **Attach VSCode to the running container**
