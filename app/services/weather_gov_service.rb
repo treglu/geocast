@@ -20,7 +20,18 @@
 #   weather_service = WeatherGovService.new(coordinates: [37.3362, -122.007])
 #   forecast = weather_service.call
 #
-#   puts weather_service.cached  # returns => false
+#   weather_service.cached  # returns => false
+#
+#   weather_service.summary_forecast #[
+#     {
+#       date: Date.parse("2024-11-20"), # Date.class
+#       high_temp: 75,
+#       low_temp: 55,
+#       avg_chance_of_rain: 15
+#     }
+#   ]
+#
+#
 #   puts forecast
 #   # returns => [
 #     {

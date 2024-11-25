@@ -8,7 +8,6 @@ RSpec.describe WeatherGovService, type: :service do
     context "with valid coordinates" do
       let(:coordinates) { [37.3362, -122.0070] }
       let(:postal_code) { "94087" }
-      # let(:forecast) { {name: "This Afternoon", temperature: 75, shortForecast: "Sunny"} }
       let(:forecast) {
         [
           {name: "This Afternoon",

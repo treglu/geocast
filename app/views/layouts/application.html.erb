@@ -43,7 +43,20 @@
         <%= yield %>
       </main>
       <footer class="pt-3 mt-4 text-body-secondary border-top">
-        &copy; Andrey Kireev
+        <div class="row fs-6">
+          <div class="col-md">
+            Author: Andrey Kireev
+            <a href="https://www.linkedin.com/in/andreykireev/">LinkedIn</a>
+          </div>
+          <div class="col-md">
+              Geocoding data provided by &copy; 
+              <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>
+            </div>
+          <div class="col-md">
+            Weather data provided by 
+            <a href="https://www.weather.gov/documentation/services-web-api">NOAA Public Web API Service</a>
+          </div>
+        </div>
       </footer>
     </div>
   </body>

@@ -16,12 +16,16 @@ RSpec.describe "Geocasts", type: :request do
           allow(WeatherGovService).to receive(:new).with(coordinates:, postal_code:).and_return(weather_service_double)
           allow(weather_service_double).to receive(:call).and_return(weather_forecast)
           allow(weather_service_double).to receive(:cached).and_return(true)
+          allow(weather_service_double).to receive(:summary_forecast).and_return(summary_forecast)
         end
 
         let(:address) { "1 Apple Park Way, Cupertino, CA" }
         let(:located_address) { "1 Apple Park Way, Cupertino, California, 94087" }
         let(:coordinates) { [37.3362, -122.0070] }
         let(:postal_code) { "94087" }
+        let(:summary_forecast) {
+          [{date: Date.parse("2024-11-20"), high_temp: 75, low_temp: 55, avg_chance_of_rain: 15}]
+        }
 
         let(:weather_forecast) {
           [

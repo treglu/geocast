@@ -19,7 +19,7 @@
           .card-text.d-flex.justify-content-between
             %p Current Temperature: #{current_forecast.dig(:temperature)}#{current_forecast.dig(:temperatureUnit)}
             %p Wind: #{current_forecast.dig(:windDirection)} - #{current_forecast.dig(:windSpeed)}
-            %p Parcipitation: #{current_forecast.dig(:probabilityOfPrecipitation, :value)}%
+            %p Precipitation: #{current_forecast.dig(:probabilityOfPrecipitation, :value)}%
           .card-text= current_forecast[:detailedForecast]
           .card-text
 
@@ -46,10 +46,10 @@
             %h6 #{day_part[:name]}, #{pretty_date(day_part[:startTime], dow: false)}
             %h5= day_part[:shortForecast]
             .d-flex.justify-content-between
-              %p Current Temperature: #{day_part.dig(:temperature)}#{day_part.dig(:temperatureUnit)}
+              %p Temperature: #{day_part.dig(:temperature)}#{day_part.dig(:temperatureUnit)}
               %p Wind: #{day_part.dig(:windDirection)} - #{day_part.dig(:windSpeed)}
               - if day_part.dig(:probabilityOfPrecipitation, :value)
-                %p Parcipitation: #{day_part.dig(:probabilityOfPrecipitation, :value)}%
+                %p Precipitation: #{day_part.dig(:probabilityOfPrecipitation, :value)}%
             %p= day_part[:detailedForecast]
 
 - else

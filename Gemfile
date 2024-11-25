@@ -35,6 +35,9 @@ gem "thruster", require: false
 # Using Geocoder gem for parsing addresses and getting lat,Lon coordinates
 gem "geocoder"
 
+# Using Faraday HTTP Client for talking with Weather API
+gem "faraday"
+
 # Using HAML for views
 gem "haml-rails"
 
@@ -57,10 +60,6 @@ group :development, :test do
 
   # Using StandardRB for linting and style
   gem "standard"
-
-
-  # Using Faraday HTTP Client for talking with Weather API
-  gem "faraday"
 end
 
 group :development do

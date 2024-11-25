@@ -2,27 +2,24 @@ require "rails_helper"
 
 RSpec.feature "Geocasts", type: :feature do
   context "with valid address" do
-    before do
-      # Stub the WeatherService to return a predictable forecast
-      geolocation_double = instance_double(GeolocationService)
-      allow(GeolocationService).to receive(:new).with(address).and_return(geolocation_double)
-      allow(geolocation_double).to receive(:call).and_return(coordinates)
-      allow(geolocation_double).to receive(:located_address).and_return(located_address)
-      allow(geolocation_double).to receive(:postal_code).and_return(postal_code)
-      allow(geolocation_double).to receive(:postal_code).and_return(postal_code)
+    let(:valid_address) { "1 Apple Park Way, Cupertino" }
+    let(:full_address) { "1 Apple Park Way, Cupertino, California, 94087" }
+    let(:long_coordinates) { [37.3362065, -122.0069962] }
+    let(:short_coordinates) { [37.3362, -122.0070] }
 
-      weather_service_double = instance_double(WeatherGovService)
-      allow(WeatherGovService).to receive(:new).with(coordinates:, postal_code:).and_return(weather_service_double)
-      allow(weather_service_double).to receive(:call).and_return(weather_forecast)
-      allow(weather_service_double).to receive(:cached).and_return(true)
-    end
+    let(:expected_response) {
+      {coordinates: long_coordinates,
+       house_number: "1",
+       street: "Apple Park Way",
+       city: "Cupertino",
+       county: "Santa Clara County",
+       state: "California",
+       postal_code: "94087",
+       country: "United States",
+       country_code: "us"}
+    }
 
-    let(:address) { "1 Apple Park Way, Cupertino, CA" }
-    let(:located_address) { "1 Apple Park Way, Cupertino, California, 94087" }
-    let(:coordinates) { [37.3362, -122.0070] }
-    let(:postal_code) { "94087" }
-
-    let(:weather_forecast) {
+    let(:forecast) {
       [
         {name: "This Afternoon",
          temperature: 75,
@@ -45,17 +42,51 @@ RSpec.feature "Geocasts", type: :feature do
       ]
     }
 
-    it "should be able to get weather forecast" do
+    let(:first_endpoint) { "https://api.weather.gov/points/#{short_coordinates[0]},#{short_coordinates[1]}" }
+    let(:first_response) { {properties: {forecast: second_endpoint}} }
+
+    let(:second_endpoint) { "https://api.weather.gov/gridpoints/MTR/93,87/forecast" }
+    let(:second_response) { {properties: {periods: forecast}} }
+
+    # Mocking only external APIs, so the test can validate the end to end functionality
+    before do
+      # Mocking Geocoder to avoid API requests during testing
+      allow(Geocoder).to receive(:search).with(valid_address).and_return([double(expected_response)])
+
+      # Mock the Faraday connection
+      connection = instance_double(Faraday::Connection)
+      allow(Faraday).to receive(:new).and_return(connection)
+
+      # Mock the first API call
+      allow(connection).to receive(:get).with(first_endpoint).and_return(
+        instance_double(Faraday::Response, success?: true, body: first_response.to_json)
+      )
+      # Mock the second API call
+      allow(connection).to receive(:get).with(second_endpoint).and_return(
+        instance_double(Faraday::Response, success?: true, body: second_response.to_json)
+      )
+    end
+
+    before do
       visit root_path
       expect(page).to have_content("Geocast App")
 
-      fill_in :address, with: address
+      fill_in :address, with: valid_address
       click_button "Check Weather"
+    end
+    it "should be able to get weather forecast" do
+      expect(page).to have_content(forecast.first[:name])
+      expect(page).to have_content(forecast.first[:temperature].to_s)
+      expect(page).to have_content(forecast.first[:shortForecast])
+    end
 
-      expect(page).to have_content(weather_forecast.first[:name])
-      expect(page).to have_content(weather_forecast.first[:temperature].to_s)
-      expect(page).to have_content(weather_forecast.first[:shortForecast])
-      expect(page).to have_content(located_address)
+    it "should be able to show full address" do
+      expect(page).to have_content(full_address)
+    end
+
+    it "should be able to show summary forecast" do
+      expect(page).to have_content("High: 75")
+      expect(page).to have_content("Low: 55")
     end
   end
   context "with empty address" do
@@ -71,15 +102,11 @@ RSpec.feature "Geocasts", type: :feature do
   end
 
   context "with invalid address" do
-    before do
-      # Stub the WeatherService to return a predictable forecast
-      geolocation_double = instance_double(GeolocationService)
-      allow(GeolocationService).to receive(:new).with(invalid_address).and_return(geolocation_double)
-      allow(geolocation_double).to receive(:call).and_return(coordinates)
-    end
-
     let(:invalid_address) { "INVALID ADDRESS" }
-    let(:coordinates) { [] }
+    before do
+      # Mocking Geocoder to avoid API requests during testing
+      allow(Geocoder).to receive(:search).with(invalid_address).and_return([])
+    end
 
     it "should see an error for invalid address" do
       visit root_path
